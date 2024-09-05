@@ -1,16 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public class Card : MonoBehaviour, 
     IDragHandler, IBeginDragHandler, IEndDragHandler,
     IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
 {
+    //oki here we go trying events
+    public UnityEvent<Card> OnPointerDownEvent;
+    public UnityEvent<Card> OnPointerUpEvent;
+    public UnityEvent<Card> OnBeginDragEvent;
+    public UnityEvent<Card> OnEndDragEvent;
+
+    // states
+    bool selected;
+
+    // movement
+    int cardSwapDistance; // min distance the card needs to cross before swapping hand position
+    int cardOffset; // distance the card is lifted when seleced
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        selected = false;
+        cardSwapDistance = 100;
+        cardOffset = 10;
     }
 
     // Update is called once per frame
@@ -19,19 +33,43 @@ public class Card : MonoBehaviour,
         
     }
 
+    public void swapCardPosition(int flipDirection)
+    {
+        // if the direction is negative, flip with before sibling.
+        // else flip with the after sibling
+
+        int siblingIndex = transform.parent.GetSiblingIndex() + flipDirection;
+        // index validation
+        if (siblingIndex < 0 || siblingIndex >= transform.parent.parent.childCount) return;
+
+        // flip the heigherarchy of the two card holders
+        transform.parent.SetSiblingIndex(siblingIndex);
+
+        // flip the transforms of the card holders too
+        Transform siblingTransform = transform.parent.parent.GetChild(siblingIndex);
+        Vector3 temp = transform.parent.localPosition;
+
+        transform.parent.localPosition = siblingTransform.localPosition;
+        siblingTransform.localPosition = temp;
+    }
+
+    // EVENT TRIGGERS
     public void OnDrag(PointerEventData eventData)
     {
+        transform.position = eventData.position;
 
+        if (transform.localPosition.x > (cardSwapDistance)) swapCardPosition(1);
+        else if (transform.localPosition.x < (-cardSwapDistance)) swapCardPosition(-1);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-
+        selected = true;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-
+        transform.localPosition = Vector3.zero;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -46,7 +84,11 @@ public class Card : MonoBehaviour,
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        //Debug.Log("Selection: "+selected);
+        selected = !selected;
 
+        if (selected) transform.localPosition = new Vector2(transform.localPosition.x, transform.localPosition.y + cardOffset);
+        else transform.localPosition = Vector2.zero;
     }
     
     public void OnPointerDown(PointerEventData eventData)
