@@ -19,6 +19,8 @@ public class Card : MonoBehaviour,
     int cardSwapDistance; // min distance the card needs to cross before swapping hand position
     int cardOffset; // distance the card is lifted when seleced
 
+    static bool cardswapped = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,12 +40,13 @@ public class Card : MonoBehaviour,
         // if the direction is negative, flip with before sibling.
         // else flip with the after sibling
 
+        // figure out what the index of the sibling we want to go to
         int siblingIndex = transform.parent.GetSiblingIndex() + flipDirection;
         // index validation
         if (siblingIndex < 0 || siblingIndex >= transform.parent.parent.childCount) return;
 
-        // flip the heigherarchy of the two card holders
-        transform.parent.SetSiblingIndex(siblingIndex);
+        // keep a record of the card position before swap
+        Vector2 cardPosition = transform.position;
 
         // flip the transforms of the card holders too
         Transform siblingTransform = transform.parent.parent.GetChild(siblingIndex);
@@ -51,11 +54,25 @@ public class Card : MonoBehaviour,
 
         transform.parent.localPosition = siblingTransform.localPosition;
         siblingTransform.localPosition = temp;
+
+        // flip the hierarchy of the two card holders
+        transform.parent.SetSiblingIndex(siblingIndex);
+
+        // update card position
+        transform.position = cardPosition;
+
+        cardswapped = true;
     }
 
     // EVENT TRIGGERS
     public void OnDrag(PointerEventData eventData)
     {
+        if(cardswapped)
+        {
+            int foo = 4;
+            ++foo;
+        }
+
         transform.position = eventData.position;
 
         if (transform.localPosition.x > (cardSwapDistance)) swapCardPosition(1);
