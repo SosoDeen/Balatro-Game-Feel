@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -6,27 +7,41 @@ public class Card : MonoBehaviour,
     IDragHandler, IBeginDragHandler, IEndDragHandler,
     IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
 {
-    //oki here we go trying events
-    public UnityEvent<Card> OnPointerDownEvent;
-    public UnityEvent<Card> OnPointerUpEvent;
-    public UnityEvent<Card> OnBeginDragEvent;
-    public UnityEvent<Card> OnEndDragEvent;
+    // card visual
+    public CardVisual cardVisual;
+    public GameObject cardVisualPrefab;
+    public VisualsHandler visualsHandler;
 
     // states
     bool selected;
+    bool wasDragged;
 
     // movement
     int cardSwapDistance; // min distance the card needs to cross before swapping hand position
     int cardOffset; // distance the card is lifted when seleced
 
-    static bool cardswapped = false;
 
+    //oki here we go trying events
+    public UnityEvent<Card> OnPointerEnterEvent;
+    public UnityEvent<Card> OnPointerExitEvent;
+    public UnityEvent<Card> OnPointerDownEvent;
+    public UnityEvent<Card> OnPointerUpEvent;
+    public UnityEvent<Card> OnBeginDragEvent;
+    public UnityEvent<Card> OnEndDragEvent;
+
+    // ------------------------------------------------------------------
     // Start is called before the first frame update
     void Start()
     {
         selected = false;
         cardSwapDistance = 100;
         cardOffset = 10;
+
+
+        visualsHandler = FindObjectOfType<VisualsHandler>();
+        // make a visual clone of this card
+        cardVisual = Instantiate(cardVisualPrefab, visualsHandler.transform).GetComponent<CardVisual>();
+        cardVisual.Initialize(this);
     }
 
     // Update is called once per frame
@@ -60,56 +75,62 @@ public class Card : MonoBehaviour,
 
         // update card position
         transform.position = cardPosition;
-
-        cardswapped = true;
     }
 
-    // EVENT TRIGGERS
+
+    // ----------- EVENT HANDLERS (IN ORDER OF TRIGGER) -----------
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        Debug.Log("Order Test: Pointer Enter"); 
+    }
+    
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        Debug.Log("Order Test: Pointer Down");
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        // set was dragged to maintain selection status
+        wasDragged = true;
+
+        Debug.Log("Order Test: Drag Begin");
+    }
+
     public void OnDrag(PointerEventData eventData)
     {
-        if(cardswapped)
-        {
-            int foo = 4;
-            ++foo;
-        }
-
         transform.position = eventData.position;
 
         if (transform.localPosition.x > (cardSwapDistance)) swapCardPosition(1);
         else if (transform.localPosition.x < (-cardSwapDistance)) swapCardPosition(-1);
     }
 
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        selected = true;
-    }
-
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        transform.localPosition = Vector3.zero;
-    }
-
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-
-    }
-
     public void OnPointerUp(PointerEventData eventData)
     {
+        // dont change selection type if card was being dragged
+        if (wasDragged) return;
+
         //Debug.Log("Selection: "+selected);
         selected = !selected;
 
         if (selected) transform.localPosition = new Vector2(transform.localPosition.x, transform.localPosition.y + cardOffset);
         else transform.localPosition = Vector2.zero;
-    }
-    
-    public void OnPointerDown(PointerEventData eventData)
-    {
 
+        Debug.Log("Order Test: Pointer Up");
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        // reset local pos of card to return to holder center
+        transform.localPosition = Vector3.zero;
+        // clear dragged state to allow card selection change
+        wasDragged = false;
+
+        Debug.Log("Order Test: Drag End");
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        Debug.Log("Order Test: Pointer Exit");
     }
 }
