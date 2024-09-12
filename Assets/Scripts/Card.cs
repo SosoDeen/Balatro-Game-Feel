@@ -35,7 +35,7 @@ public class Card : MonoBehaviour,
     {
         selected = false;
         cardSwapDistance = 100;
-        cardOffset = 10;
+        cardOffset = 40;
 
 
         visualsHandler = FindObjectOfType<VisualsHandler>();
@@ -81,11 +81,17 @@ public class Card : MonoBehaviour,
     // ----------- EVENT HANDLERS (IN ORDER OF TRIGGER) -----------
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("Order Test: Pointer Enter"); 
+        // event call
+        cardVisual.PointerEnter();
+
+        Debug.Log("Order Test: Pointer Enter");
     }
     
     public void OnPointerDown(PointerEventData eventData)
     {
+        // event call
+        cardVisual.PointerDown();
+
         Debug.Log("Order Test: Pointer Down");
     }
 
@@ -93,6 +99,9 @@ public class Card : MonoBehaviour,
     {
         // set was dragged to maintain selection status
         wasDragged = true;
+
+        // event call
+        cardVisual.BeginDrag();
 
         Debug.Log("Order Test: Drag Begin");
     }
@@ -116,6 +125,9 @@ public class Card : MonoBehaviour,
         if (selected) transform.localPosition = new Vector2(transform.localPosition.x, transform.localPosition.y + cardOffset);
         else transform.localPosition = Vector2.zero;
 
+        // event call
+        cardVisual.PointerUp();
+
         Debug.Log("Order Test: Pointer Up");
     }
 
@@ -126,11 +138,16 @@ public class Card : MonoBehaviour,
         // clear dragged state to allow card selection change
         wasDragged = false;
 
+        cardVisual.EndDrag();
+
         Debug.Log("Order Test: Drag End");
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        // event call
+        cardVisual.PointerExit();
+
         Debug.Log("Order Test: Pointer Exit");
     }
 }
