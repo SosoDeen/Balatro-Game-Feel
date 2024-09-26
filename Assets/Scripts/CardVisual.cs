@@ -22,7 +22,8 @@ public class CardVisual : MonoBehaviour
     float shadowOffset = -10f;
 
     // rotation params
-    Vector3 targetRotation;
+    Vector3 leftoverRotation;
+    Vector3 leftoverDistance;
     float rotationMax = 70f;
     float rotationSpeed = 20f;
 
@@ -64,7 +65,7 @@ public class CardVisual : MonoBehaviour
     void Start()
     {
         hoverDuration = 0.2f;
-        hoverScale = 1.2f;
+        hoverScale = 1.1f;
         dragScale = 1.3f;
         punchStrength = 4.5f;
         punchVector = new Vector3(0, 0, punchStrength);
@@ -80,7 +81,7 @@ public class CardVisual : MonoBehaviour
         // move card
         MoveCard();
         // rotate card as it gets dragged
-        //RotateCard();
+        RotateCard();
         // idle rotation on select
     }
 
@@ -99,15 +100,40 @@ public class CardVisual : MonoBehaviour
         // validation (might need a dragging check)
         if (matchingCard == null || !isDragging) return;
 
-        // sohcahtoa time >:)
+        /*// sohcahtoa time >:)
         float forwardMovment = transform.position.x - cardTransform.position.x; // adj
         float upMovment = transform.position.y - cardTransform.position.y; // opp
         float angle = Mathf.Atan(upMovment/forwardMovment);
+        */
 
-        // lerp angle and set it as current rotation
-        Vector3 angleVector = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, angle);
-        targetRotation = Vector3.Lerp(transform.eulerAngles, angleVector, rotationSpeed * Time.deltaTime);
-        transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, Mathf.Clamp(targetRotation.z, -rotationMax, rotationMax));
+
+        // rotation based on distance from mouse
+        Vector3 distance = transform.position - cardTransform.position;
+        // lerping a part of the desired distance for smooth rotation
+        leftoverDistance = Vector3.Lerp(leftoverDistance, distance, Time.deltaTime);
+
+        // how much the card will be rotated
+        //Vector3 angleVector = (isDragging? leftoverDistance : distance) * rotationSpeed;
+        Vector3 angleVector = distance;
+        // lerping a part of the desired rotation
+        leftoverRotation = Vector3.Lerp(transform.eulerAngles, angleVector, rotationSpeed * Time.deltaTime);
+        // rotating the card one lerp portion at a time
+        transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, Mathf.Clamp(leftoverRotation.x, -rotationMax, rotationMax));
+        //Debug.Log("Distance: " + distance+ "\nAngle: " + angleVector +"\nRotation: " + leftoverRotation+ "\nFinal Rotation: " + transform.eulerAngles);
+    }
+
+    public void TiltCard()
+    {
+        // working backwards time!
+
+
+        // lerp floats to make tilt vector
+        float lerpX = 10;
+        float lerpY = 20;
+        float lerpZ = 30;
+
+        // first we need to set the final tilt based on lerped data
+        transform.eulerAngles = new Vector3(lerpX, lerpY, lerpZ);
     }
 
     // swap method to move the 
@@ -119,6 +145,11 @@ public class CardVisual : MonoBehaviour
     }
 
     // -------------- EVENT FUNCTIONS ---------------
+
+    public void Swap()
+    {
+        transform.DOPunchRotation(punchVector, punchDuration);
+    }
 
     public void PointerEnter()
     {
