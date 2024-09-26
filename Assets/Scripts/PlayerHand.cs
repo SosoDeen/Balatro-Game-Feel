@@ -13,7 +13,7 @@ public class PlayerHand : MonoBehaviour
         if (transform.childCount == 0) return;
 
         int childCount = transform.childCount - 1;
-        float middleIndex = childCount / 2;
+        float middleIndex = (float)childCount / 2;
 
         // goes through children and offset their Y based on middle distance
         for (int i = 0; i < childCount; i++)
