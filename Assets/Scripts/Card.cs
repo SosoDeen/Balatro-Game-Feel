@@ -79,7 +79,7 @@ public class Card : MonoBehaviour,
         transform.position = cardPosition;
 
         // update hand arc on swap
-        hand.UpdateHandArc();
+        //hand.UpdateHandArc();
 
         // event call
         //cardVisual.Swap();
@@ -131,7 +131,8 @@ public class Card : MonoBehaviour,
         selected = !selected;
 
         if (selected) transform.localPosition = new Vector2(transform.localPosition.x, transform.localPosition.y + cardOffset);
-        else hand.UpdateHandArc();
+        else transform.localPosition = Vector3.zero;
+        //else hand.UpdateHandArc();
 
         // event call
         cardVisual.PointerUp();
@@ -146,7 +147,10 @@ public class Card : MonoBehaviour,
         // clear dragged state to allow card selection change
         wasDragged = false;
 
+        // update hand arc
         hand.UpdateHandArc();
+
+        // event call
         cardVisual.EndDrag();
 
         Debug.Log("Order Test: Drag End");

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PlayerHand : MonoBehaviour
 {
-    public int offsetY = 10;
+    public int offsetY = 4;
 
     public void UpdateHandArc()
     {
@@ -20,6 +20,8 @@ public class PlayerHand : MonoBehaviour
         {
             // get the amount of times to offset based on center
             float offsetMult = Mathf.Abs(middleIndex - i);
+
+            if (offsetMult < 1) offsetMult = 0;
 
             // change the posision of the card
             Transform childTransform = transform.GetChild(i).GetChild(0).transform;

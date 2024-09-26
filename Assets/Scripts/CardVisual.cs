@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.UI;
 
 public class CardVisual : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class CardVisual : MonoBehaviour
     Card matchingCard;
     Transform cardTransform;
     Canvas visualCanvas;
+    Material material;
 
     // shadow references
     Transform shadow;
@@ -26,6 +28,10 @@ public class CardVisual : MonoBehaviour
     Vector3 leftoverDistance;
     float rotationMax = 70f;
     float rotationSpeed = 20f;
+
+    // tilting params
+    float tiltSpeed = 5f;
+    float tiltAmount = 30f;
 
     // tweening values
     [Header("Punch Tween Values")]
@@ -73,6 +79,7 @@ public class CardVisual : MonoBehaviour
 
         visualCanvas = GetComponent<Canvas>();
         shadowCanvas = GetComponent<Canvas>();
+        material = transform.GetChild(1).GetComponent<Image>().material;
     }
 
     // Update is called once per frame
@@ -83,6 +90,7 @@ public class CardVisual : MonoBehaviour
         // rotate card as it gets dragged
         RotateCard();
         // idle rotation on select
+        TiltCard();
     }
 
     public void MoveCard()
@@ -96,7 +104,7 @@ public class CardVisual : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, offsetCardTransform, followSpeed * Time.deltaTime);
     }
 
-    // no work :<
+    // lowkey work :>
     public void RotateCard()
     {
         // validation (might need a dragging check)
@@ -128,14 +136,27 @@ public class CardVisual : MonoBehaviour
     {
         // working backwards time!
 
+        // for idle tile: Cosine and Sine!
+        float sine = Mathf.Sin(Time.time);
+        float cosine = Mathf.Cos(Time.time);
+        //Debug.Log("Sine: " + sine+"  Cosine: "+cosine+"  Time: "+Time.time);
+
+        // before we lerp on hover though, we must know where we are tilting
+        float tiltX = 10;
+        float tiltY = 20;
+        float tiltZ = 30;
 
         // lerp floats to make tilt vector
-        float lerpX = 10;
-        float lerpY = 20;
-        float lerpZ = 30;
+        float lerpX = Mathf.LerpAngle(transform.eulerAngles.x, (sine * tiltAmount), tiltSpeed * Time.deltaTime);
+        float lerpY = Mathf.LerpAngle(transform.eulerAngles.y, (cosine * tiltAmount), tiltSpeed * Time.deltaTime); ;
+        float lerpZ = 0;
+        // silly me made a rave card dance b/c i didnt use LerpAngle
 
         // first we need to set the final tilt based on lerped data
         transform.eulerAngles = new Vector3(lerpX, lerpY, lerpZ);
+
+        // change the angle of the shader?
+        material.SetVector("_Rotation", new Vector2(sine, cosine));
     }
 
     // swap method to move the 
