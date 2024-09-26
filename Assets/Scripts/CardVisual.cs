@@ -57,7 +57,7 @@ public class CardVisual : MonoBehaviour
         matchingCard.OnEndDragEvent.AddListener(EndDrag);
         */
 
-        transform.position = cardTransform.position;
+        transform.position = new Vector3(cardTransform.position.x, cardTransform.position.y, 400);
         shadow = transform.GetChild(0);
     }
 
@@ -90,8 +90,10 @@ public class CardVisual : MonoBehaviour
         //validation
         if (matchingCard == null) return;
 
+        Vector3 offsetCardTransform = new Vector3(cardTransform.position.x, cardTransform.position.y, 400);
+
         // move the card visual to matching card position
-        transform.position = Vector3.Lerp(transform.position, cardTransform.position, followSpeed * Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, offsetCardTransform, followSpeed * Time.deltaTime);
     }
 
     // no work :<

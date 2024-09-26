@@ -11,15 +11,15 @@ public class Card : MonoBehaviour,
     public CardVisual cardVisual;
     public GameObject cardVisualPrefab;
     public VisualsHandler visualsHandler;
+    public PlayerHand hand;
 
     // states
-    bool selected;
+    public bool selected { get; private set; }
     bool wasDragged;
 
     // movement
     int cardSwapDistance; // min distance the card needs to cross before swapping hand position
     int cardOffset; // distance the card is lifted when seleced
-
 
     //oki here we go trying events
     public UnityEvent<Card> OnPointerEnterEvent;
@@ -39,6 +39,8 @@ public class Card : MonoBehaviour,
 
 
         visualsHandler = FindObjectOfType<VisualsHandler>();
+        hand = FindObjectOfType<PlayerHand>();
+        hand.UpdateHandArc();
         // make a visual clone of this card
         cardVisual = Instantiate(cardVisualPrefab, visualsHandler.transform).GetComponent<CardVisual>();
         cardVisual.Initialize(this);
@@ -75,6 +77,12 @@ public class Card : MonoBehaviour,
 
         // update card position
         transform.position = cardPosition;
+
+        // update hand arc on swap
+        hand.UpdateHandArc();
+
+        // event call
+        //cardVisual.Swap();
     }
 
 
@@ -123,7 +131,7 @@ public class Card : MonoBehaviour,
         selected = !selected;
 
         if (selected) transform.localPosition = new Vector2(transform.localPosition.x, transform.localPosition.y + cardOffset);
-        else transform.localPosition = Vector2.zero;
+        else hand.UpdateHandArc();
 
         // event call
         cardVisual.PointerUp();
@@ -138,6 +146,7 @@ public class Card : MonoBehaviour,
         // clear dragged state to allow card selection change
         wasDragged = false;
 
+        hand.UpdateHandArc();
         cardVisual.EndDrag();
 
         Debug.Log("Order Test: Drag End");
